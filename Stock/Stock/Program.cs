@@ -1,5 +1,7 @@
-﻿using System;
+﻿using DbUp;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Stock
 {
@@ -8,6 +10,17 @@ namespace Stock
     private const string CONNECTION_STRING = "Server=A-305-07;Database=Stock;Trusted_Connection=True;";
     static void Main(string[] args)
     {
+      EnsureDatabase.For.SqlDatabase(CONNECTION_STRING);
+
+      var upgrader =
+        DeployChanges.To
+            .SqlDatabase(CONNECTION_STRING)
+            .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+            .LogToConsole()
+            .Build();
+
+      var result = upgrader.PerformUpgrade();
+
       WaybillRepository waybillRepository = new WaybillRepository(CONNECTION_STRING);
       StockerRepository stockerRepository = new StockerRepository(CONNECTION_STRING);
       // Add
